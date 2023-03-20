@@ -1,4 +1,4 @@
-![Workflow](https://github.com/andrewlegkii/yamdb_final/blob/master/.github/workflows/yamdb_workflow.yml)
+![Workflow](https://github.com/andrewlegkii/yamdb_final/blob/master/.github/workflows/yamdb_workflow.yml/badge.svg)
 
 
 # Описание проекта YaMDb  
