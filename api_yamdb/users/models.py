@@ -1,49 +1,62 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import Group as BaseGroup
 from django.db import models
 
 
+class Group(BaseGroup):
+
+    class Meta:
+        verbose_name = 'группу'
+        verbose_name_plural = 'Группы'
+        proxy = True
+
+
 class User(AbstractUser):
-    """User model class."""
 
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
-
-    ROLE_CHOICES = (
+    ROLE_CHOICES = [
         (USER, 'Пользователь'),
         (MODERATOR, 'Модератор'),
         (ADMIN, 'Администратор')
-    )
+    ]
 
+    email = models.EmailField(unique=True, verbose_name='Email')
     first_name = models.CharField(
-        'Имя',
-        max_length=150,
-        blank=True
+        max_length=150, blank=True, verbose_name='Имя'
+    )
+    bio = models.TextField(blank=True, verbose_name='О себе')
+    role = models.CharField(
+        max_length=30, choices=ROLE_CHOICES, default=USER, verbose_name='Роль'
+    )
+    confirmation_code = models.TextField(
+        null=True, verbose_name='Код подтверждения'
     )
 
-    email = models.EmailField(
-        'Адрес электронной почты',
-        max_length=254,
-        unique=True
-    )
-    role = models.CharField(
-        'Роль',
-        max_length=50,
-        choices=ROLE_CHOICES,
-        default=USER
-    )
-    bio = models.TextField(
-        'Биография',
-        blank=True,
-    )
+    class Meta:
+        verbose_name = 'пользователя'
+        verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.username
+
+    def save(self, *args, **kwargs):
+        if self.role:
+            if self.role == self.ADMIN:
+                self.is_superuser = True
+                self.is_staff = True
+            if self.role == self.MODERATOR:
+                self.is_staff = True
+            return super(User, self).save(*args, **kwargs)
+        if self.is_superuser:
+            self.role = self.ADMIN
+        elif self.is_staff:
+            self.role = self.MODERATOR
+        else:
+            self.role = self.USER
+        return super(User, self).save(*args, **kwargs)
 
     @property
     def is_admin(self):
-        return (self.is_superuser
-                or self.is_staff
-                or self.role == self.ADMIN)
-
-    @property
-    def is_moderator(self):
-        return (self.is_admin
-                or self.role == self.MODERATOR)
+        return self.role == 'admin'
