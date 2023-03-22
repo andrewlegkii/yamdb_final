@@ -56,7 +56,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: diablik666/yamdb
+          tags: andrewlegkii/yamdb
           file: api_yamdb/Dockerfile
 
   deploy:
@@ -73,7 +73,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
-          sudo docker-compose pull diablik666/yamdb
+          sudo docker-compose pull andrewlegkii/yamdb
           sudo docker-compose stop
           sudo docker-compose rm -f web
           touch .env
