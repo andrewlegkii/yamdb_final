@@ -8,7 +8,7 @@ services:
       - ./.env
 
   web:
-    image: diablik666/yamdb
+    image: andrewlegkii/yamdb
     restart: always
     volumes:
       - static_value:/app/static/
