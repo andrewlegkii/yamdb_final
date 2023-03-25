@@ -1,31 +1,47 @@
-from rest_framework import permissions
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class IsAuthorPermission(permissions.BasePermission):
-    message = (
-        'Only Author, Moderator, Admin or Superuser is allowed to access.')
+class IsAuthorModeratorAdminOrReadOnly(BasePermission):
+    message = 'Изменение чужого контента запрещено!'
 
     def has_permission(self, request, view):
-        return (request.method in permissions.SAFE_METHODS
-                or request.user.is_authenticated)
+        return (
+            request.method in SAFE_METHODS
+            or request.user.is_authenticated
+        )
 
     def has_object_permission(self, request, view, obj):
-        return (request.method in permissions.SAFE_METHODS
-                or request.user.role in ['moderator', 'admin']
-                or request.user.is_superuser
-                or obj.author == request.user)
+        return (
+            request.method in SAFE_METHODS
+            or obj.author == request.user
+            or (request.user.is_moderator
+                or request.user.is_admin)
+        )
 
 
-class IsAdminPermission(permissions.BasePermission):
-    message = 'Only Admin or Superuser is allowed to access.'
-
-    def has_permission(self, request, view):
-        return (request.user.is_authenticated
-                and (request.user.is_admin or request.user.is_superuser))
-
-
-class IsReadOnlyPermission(permissions.BasePermission):
-    message = 'Only Admin or Superuser is allowed to access.'
+class IsAuthenticated(BasePermission):
+    message = 'Доступно только для после аутентификации!'
 
     def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS
+        return request.user.is_authenticated
+
+
+class IsAdmin(BasePermission):
+    message = 'Доступно только для администратора!'
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.is_admin
+        )
+
+
+class IsAdminOrReadOnly(BasePermission):
+    message = 'Изменение доступно только для администратора!'
+
+    def has_permission(self, request, view):
+        return (
+            request.method in SAFE_METHODS
+            or (request.user.is_authenticated
+                and request.user.is_admin)
+        )
