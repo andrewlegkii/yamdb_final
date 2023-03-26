@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Comment, Genre, Genre_title, Review, Title
+from .models import Category, Comment, Genre, GenreTitle, Review, Title
 
 
 @admin.register(Category)
@@ -27,7 +27,7 @@ class TitleAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-@admin.register(Genre_title)
+@admin.register(GenreTitle)
 class GenreTitleAdmin(admin.ModelAdmin):
     list_display = ('title', 'genre')
     list_editable = ('genre',)
