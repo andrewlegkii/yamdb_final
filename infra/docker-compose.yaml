@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - DB_NAME=postgres
-      - DB_HOST=db
+      - DB_HOST=localhost
     depends_on:
       - db
     env_file:
