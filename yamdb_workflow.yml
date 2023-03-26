@@ -41,7 +41,7 @@ jobs:
           with:
             context: api_yamdb
             push: true
-            tags: ${{ secrets.DOCKER_USERNAME }}/yamdb:latest
+            tags: ${{ secrets.DOCKER_USERNAME }}/postgers:latest
   
   deploy:
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull andyplo/yamdb:latest
+            sudo docker pull andrewlegkii/postgers:latest
             sudo docker-compose stop
             sudo docker-compose rm -f web
             rm .env
