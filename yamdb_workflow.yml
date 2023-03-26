@@ -41,7 +41,7 @@ jobs:
           with:
             context: api_yamdb
             push: true
-            tags: ${{ secrets.DOCKER_USERNAME }}/postgres:latest
+            tags: ${{ secrets.DOCKER_USERNAME }}/yamdb:latest
   
   deploy:
     runs-on: ubuntu-latest
@@ -55,11 +55,12 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull andrewlegkii/postgres:latest
+            sudo docker pull andyplo/yamdb:latest
             sudo docker-compose stop
             sudo docker-compose rm -f web
             rm .env
             touch .env
+            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
             echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
