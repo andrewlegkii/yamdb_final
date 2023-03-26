@@ -1,24 +1,17 @@
+import datetime
 import os
-from datetime import timedelta
-
-from core.views import get_key
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-
-if not SECRET_KEY:
-    SECRET_KEY = get_key(50)
+SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.environ.get('DEBUG', default=0))
+DEBUG = False
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", default='localhost').split(" ")
+ALLOWED_HOSTS = ['*']
+
 
 # Application definition
 
@@ -29,14 +22,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # API apps
     'rest_framework',
-    'rest_framework_simplejwt',
+    'rest_framework_swagger',
     'django_filters',
-    # my apps
-    'core',
-    'reviews',
+    'titles',
     'api',
+    'users',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -51,7 +43,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'api_yamdb.urls'
 
-TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -70,33 +62,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
+
 # Database
 
-SQLITE = {
+DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'TIME_ZONE': 'UTC',
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'USER': os.getenv('POSTGRES_USER', default='postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': os.getenv('DB_HOST', default='db'),
+        'PORT': os.getenv('DB_PORT', default='5432')
     }
 }
 
-POSTGRES = {
-    'default': {
-        'ENGINE': os.environ.get(
-            'POSTGRES_ENGINE',
-            default='django.db.backends.postgresql'
-        ),
-        'NAME': os.environ.get('POSTGRES_DB', default='postgres'),
-        'USER': os.environ.get('POSTGRES_USER', default='postgres'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', default='postgres'),
-        'HOST': os.environ.get('POSTGRES_HOST', default='db'),
-        'PORT': os.environ.get('POSTGRES_PORT', default='5432'),
-    }
-}
-
-DATABASES = SQLITE if DEBUG else POSTGRES
-
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Password validation
 
@@ -115,11 +94,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'reviews.User'
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
@@ -129,46 +107,38 @@ USE_L10N = True
 
 USE_TZ = True
 
+
 # Static files (CSS, JavaScript, Images)
+
 STATIC_URL = '/static/'
 
-if DEBUG:
-    STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
-else:
-    STATIC_ROOT = '/app/static/'
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/app/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# rest_framework settings
-
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10,
-}
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
-    "AUTH_HEADER_TYPES": ("Bearer",),
-}
-
-# email settings
+AUTH_USER_MODEL = 'users.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-EMAIL_HOST_USER = 'yamdb@gmail.com'
+DEFAULT_FROM_EMAIL = 'admin@yamdb.com'
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=5),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}

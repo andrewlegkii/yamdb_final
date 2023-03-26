@@ -1,14 +1,15 @@
-from django_filters import CharFilter, FilterSet, NumberFilter
-from reviews.models import Title
+from rest_framework import filters
 
 
-class TitleFilterSet(FilterSet):
-    """Фильтр произведений по 4-м полям."""
-    name = CharFilter(field_name='name', lookup_expr='icontains')
-    category = CharFilter(field_name='category__slug', lookup_expr='icontains')
-    genre = CharFilter(field_name='genre__slug', lookup_expr='icontains')
-    year = NumberFilter(field_name='year', lookup_expr='exact')
-
-    class Meta:
-        model = Title
-        fields = ('category', 'genre', 'year', 'name')
+class TitleFilters(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        category_slug = request.query_params.get('category', None)
+        if category_slug:
+            return queryset.filter(category__slug=category_slug)
+        genre_slug = request.query_params.get('genre', None)
+        if genre_slug:
+            return queryset.filter(genre__slug=genre_slug)
+        name = request.query_params.get('name', None)
+        if name:
+            return queryset.filter(name__contains=name)
+        return False
